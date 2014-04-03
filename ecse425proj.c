@@ -62,25 +62,6 @@ void matVecMult(int N, const double *matA, const double *vecB, double *vecC)
     }
 }
 
-void verifyMatMult(int N, const double *matA, const double *matB, const double *matC)
-{
-    double *ref;
-    ref = (double *) malloc(N*N * sizeof(double));
-    matMult(N,matA,matB,ref); // Use TA's reference implementation
-    compareVecs(N,matC,ref);
-    free(ref);
-}
-
-void verifyMatVecMult(int N, const double *matA, const double *vecB, const double *vecC)
-{
-
-    double *ref;
-    ref = (double *) malloc(N * sizeof(double));
-    matVecMult(N,matA,vecB,ref); // Use TA's reference implementation
-    compareVecs(N,vecC,ref);
-    free(ref);
-}
-
 double compareVecs(int N, const double *src, const double *ref)
 {
     double ds = 0., ss = 0.;

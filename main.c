@@ -26,6 +26,12 @@ int main(int argc, const char *argv[])
     // Whether to display the result or not
     int disp = 0;
 
+    // Whether to call the naive implementation
+    int execNaive = 1;
+
+    // Whether to call the optimized implementation
+    int execOPT = 1;
+
     // Parse command line
     {
         int arg_index = 1;
@@ -52,11 +58,38 @@ int main(int argc, const char *argv[])
             {
                 arg_index++;
                 verif = 1;
+                if(execNaive==0 || execOPT==0) {
+                  printf("***Must call both naive and optimized when running verification\n");
+                  print_usage = 1;
+                  break;
+                }
             }
             else if( strcmp(argv[arg_index], "-disp") == 0 )
             {
                 arg_index++;
                 disp = 1;
+            }
+            else if( strcmp(argv[arg_index], "-naive") == 0 )
+            {
+                arg_index++;
+                execNaive = 1;
+                execOPT   = 0;
+                if(verif==1) {
+                  printf("***Must call both naive and optimized when running verification\n");
+                  print_usage = 1;
+                  break;                  
+                }
+            }
+            else if( strcmp(argv[arg_index], "-OPT") == 0 )
+            {
+                arg_index++;
+                execOPT   = 1;
+                execNaive = 0;
+                if(verif==1) {
+                  printf("***Must call both naive and optimized when running verification\n");
+                  print_usage = 1;
+                  break;                  
+                }
             }
             else
             {
@@ -75,6 +108,8 @@ int main(int argc, const char *argv[])
             printf("  -operation <ID> : Operation ID = 0 for MatMult or ID = 1 for MatVecMult\n");
             printf("  -verif          : Activate verification\n");
             printf("  -disp           : Display result (use only for small N!)\n");
+            printf("  -naive          : Run only naive implementation\n");
+            printf("  -OPT            : Run only optimized implementation\n");
             printf("  -help           : Display this message\n");
             printf("\n");
         }
@@ -94,33 +129,37 @@ int main(int argc, const char *argv[])
                 // Allocate memory
                 matA = (double *) malloc(N*N * sizeof(double));
                 matB = (double *) malloc(N*N * sizeof(double));
-                matC1 = (double *) malloc(N*N * sizeof(double));
-                matC2 = (double *) malloc(N*N * sizeof(double));
+                if(execNaive) matC1 = (double *) malloc(N*N * sizeof(double));
+                if(execOPT)   matC2 = (double *) malloc(N*N * sizeof(double));
 
                 // Initialize matrix values
                 randInitialize(N*N,matA);
                 randInitialize(N*N,matB);
 
-                // Perform naive matA x matB = matC1
                 clock_t tic, toc;
                 double tm;
 
-                tic = clock();
-                matMult(N,matA,matB,matC1);
-                toc = clock();
-                tm = (double)(toc - tic) / CLOCKS_PER_SEC;
-                printf("Elapsed time for naive mat-mat mult.: %f seconds\n",tm);
+                if(execNaive) {
+                  // Perform naive matA x matB = matC1
+                  tic = clock();
+                  matMult(N,matA,matB,matC1);
+                  toc = clock();
+                  tm = (double)(toc - tic) / CLOCKS_PER_SEC;
+                  printf("Elapsed time for naive mat-mat mult.: %f seconds\n",tm);
+                }
 
-                // Perform optimized matA x matB = matC2
-                tic = clock();
-                matMult_opt(N,matA,matB,matC2);
-                toc = clock();
-                tm = (double)(toc - tic) / CLOCKS_PER_SEC;
-                printf("Elapsed time for optimized mat-mat mult.: %f seconds\n",tm);
+                if(execOPT) {
+                  // Perform optimized matA x matB = matC2
+                  tic = clock();
+                  matMult_opt(N,matA,matB,matC2);
+                  toc = clock();
+                  tm = (double)(toc - tic) / CLOCKS_PER_SEC;
+                  printf("Elapsed time for optimized mat-mat mult.: %f seconds\n",tm);
+                }
 
-                // Verify results
+                // Verify results (compare the two matrices)
                 if(verif)
-                    compareVecs(N,matC2,matC1);
+                    compareVecs(N*N,matC2,matC1);
 
                 // Display results (don't use for large matrices)
                 if(disp)
@@ -136,8 +175,8 @@ int main(int argc, const char *argv[])
                 // Free memory
                 free(matA);
                 free(matB);
-                free(matC1);
-                free(matC2);
+                if(execNaive) free(matC1);
+                if(execOPT)   free(matC2);
             }
             break;
 
@@ -149,29 +188,33 @@ int main(int argc, const char *argv[])
                 // Allocate memory
                 matA = (double *) malloc(N*N * sizeof(double));
                 vecB = (double *) malloc(N*N * sizeof(double));
-                vecC1 = (double *) malloc(N*N * sizeof(double));
-                vecC2 = (double *) malloc(N*N * sizeof(double));
+                if(execNaive) vecC1 = (double *) malloc(N*N * sizeof(double));
+                if(execOPT)   vecC2 = (double *) malloc(N*N * sizeof(double));
 
                 // Initialize values
                 randInitialize(N*N,matA);
                 randInitialize(N,vecB);
 
-                // Perform naive matA x vecB = vecC1
                 clock_t tic, toc;
                 double tm;
 
-                tic = clock();
-                matVecMult(N,matA,vecB,vecC1);  // You can replace this with your optimized methdo
-                toc = clock();
-                tm = (double)(toc - tic) / CLOCKS_PER_SEC;
-                printf("Elapsed time for naive mat-vec mult.: %f seconds\n",tm);
+                if(execNaive) {
+                  // Perform naive matA x vecB = vecC1
+                  tic = clock();
+                  matVecMult(N,matA,vecB,vecC1);
+                  toc = clock();
+                  tm = (double)(toc - tic) / CLOCKS_PER_SEC;
+                  printf("Elapsed time for naive mat-vec mult.: %f seconds\n",tm);
+                }
 
-                // Perform optimized matA x vecB = vecC2
-                tic = clock();
-                matVecMult_opt(N,matA,vecB,vecC2);  // You can replace this with your optimized methdo
-                toc = clock();
-                tm = (double)(toc - tic) / CLOCKS_PER_SEC;
-                printf("Elapsed time for optimized mat-vec mult.: %f seconds\n",tm);
+                if(execOPT) {
+                  // Perform optimized matA x vecB = vecC2
+                  tic = clock();
+                  matVecMult_opt(N,matA,vecB,vecC2);
+                  toc = clock();
+                  tm = (double)(toc - tic) / CLOCKS_PER_SEC;
+                  printf("Elapsed time for optimized mat-vec mult.: %f seconds\n",tm);
+                }
 
                 // Verify results
                 if(verif)
@@ -191,8 +234,8 @@ int main(int argc, const char *argv[])
                 // Free memory
                 free(matA);
                 free(vecB);
-                free(vecC1);
-                free(vecC2);
+                if(execNaive) free(vecC1);
+                if(execOPT)   free(vecC2);
             }
             break;
 
