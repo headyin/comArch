@@ -2,6 +2,7 @@
 #include "ecse425proj.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #define BLOCK_ELEMENTS 8 //echa block can have 8 doubles
 
@@ -57,4 +58,15 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
 void matMult_opt(int N, const double *matA, const double *matB, double *matC) 
 {
     // Code in your optimized implementation here
+    int i,j,k;
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < N; j++)
+        {
+            for (k = 0; k < N; k++)
+            {
+                (matC + i*N)[k] += (matA + i*N)[j] *(matB + j*N)[k];
+            }
+        }
+    }
 }
