@@ -22,6 +22,7 @@ void matVecMult_part(int L, int N, int M, const double *matA, const double *vecB
 void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC) 
 {
     // Code in your optimized implementation here
+/*
     int i, j;
     for (i =0; i < N; i++)
     {
@@ -31,7 +32,8 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
             vecC[i] += (matA+i*N)[j] * vecB[j];
         }
     }
-/*
+*/
+
     int row = 0, column;
     memset(vecC, 0, sizeof(double) * N);
     while (row + BLOCK_ELEMENTS < N)
@@ -52,12 +54,30 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
         column += BLOCK_ELEMENTS;
     }
     matVecMult_part(N, N - row, N - column, matA + row * N + column, vecB + column, vecC + row);
-*/
+
 }
 
 void matMult_opt(int N, const double *matA, const double *matB, double *matC) 
 {
     // Code in your optimized implementation here
+
+    double* vecB = (double*)malloc(sizeof(double)*N);
+    double* result = (double*)malloc(sizeof(double)*N);
+    int i,j;
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < N; j++)
+        {
+            vecB[j] = (matB+j*N)[i];
+        }
+        matVecMult_opt(N, matA, vecB, result);
+        for (j = 0; j < N; j++)
+        {
+            (matC+j*N)[i] = result[j];
+        }
+    }
+
+/*
     int i,j,k;
     for (i = 0; i < N; i++)
     {
@@ -69,4 +89,5 @@ void matMult_opt(int N, const double *matA, const double *matB, double *matC)
             }
         }
     }
+*/
 }
