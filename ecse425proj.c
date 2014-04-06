@@ -78,17 +78,15 @@ void matVecMult(int N, const double *matA, const double *vecB, double *vecC)
     if(dlayout == RowMaj)
     {
         // Code in your naive implementation here
-        int i = 0;
-	int j = 0;
-	while (i < N){
-		vecC[i] = 0;
-		j = 0;
-		while (j < N){
-			vecC[i] += (matA+i*N)[j] * vecB[j];
-			j++;
-		}
-		i++;
-	}
+        int i, j;
+        for (i =0; i < N; i++)
+        {
+            vecC[i] = 0;
+            for (j = 0; j < N; j++)
+            {
+                vecC[i] += (matA+i*N)[j] * vecB[j];
+            }
+        }
     }
 }
 

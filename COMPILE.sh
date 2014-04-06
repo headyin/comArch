@@ -5,13 +5,20 @@
 # Sometimes you might want to turn on optimizations (-O2 or -O3), in
 # particular for the competition.
 FLAGS="-g -Wall"
+OPTFLAGS="-O3"
+
+BUILD="build"
 
 # List all the c files here
-SOURCE="main.c ecse425proj.c ecse425projOPT.c"
+OBJECTS="$BUILD/main.o $BUILD/ecse425proj.o $BUILD/ecse425projOPT.o"
 
 # create directory "build" if it doesn't exist
 [ -d build ] || mkdir build
 
 # compile! (this will generate an executable named "ecse425proj" in
 # the directory "build/")
-gcc $FLAGS $SOURCE -o build/ecse425proj
+
+gcc $FLAGS -c main.c -o $BUILD/main.o
+gcc $FLAGS -c ecse425proj.c -o $BUILD/ecse425proj.o
+gcc $FLAGS $OPTFLAGS -c ecse425projOPT.c -o $BUILD/ecse425projOPT.o
+gcc $FLAGS $OBJECTS -o $BUILD/ecse425proj
