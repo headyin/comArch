@@ -6,28 +6,34 @@
 
 #define BLOCK_ELEMENTS 8 //echa block can have 8 doubles
 
-void matVecMult_part88(int L, const double *matA, const double *vecB, double *vecC)
+void matVecMult_part88(const double *matA, const double *vecB, double *vecC)
 {
-    int i, j;
-    for (i =0; i < BLOCK_ELEMENTS; i++)
-    {
-        for (j = 0; j < BLOCK_ELEMENTS; j++)
-        {
-            vecC[i] += (matA+i*L)[j] * vecB[j];
-        }
-    }
+//    int j;
+//    for (j = 0; j < BLOCK_ELEMENTS; j++)
+//    {
+//        (*vecC) += (matA)[j] * vecB[j];
+//    }
+    double temp = matA[0] * vecB[0];
+    temp += matA[1] * vecB[1];
+    temp += matA[2] * vecB[2];
+    temp += matA[3] * vecB[3];
+    temp += matA[4] * vecB[4];
+    temp += matA[5] * vecB[5];
+    temp += matA[6] * vecB[6];
+    temp += matA[7] * vecB[7];
+    *vecC += temp;
+
+//    *vecC += (matA[0] * vecB[0] + matA[1] * vecB[1] + matA[2] * vecB[2] + matA[3] * vecB[3]
+//            + matA[4] * vecB[4] + matA[5] * vecB[5] + matA[6] * vecB[6] + matA[7] * vecB[7]);
 }
 
 
-void matVecMult_part(int L, int N, int M, const double *matA, const double *vecB, double *vecC)
+void matVecMult_part(int M, const double *matA, const double *vecB, double *vecC)
 {
-    int i, j;
-    for (i =0; i < N; i++)
+    int j;
+    for (j = 0; j < M; j++)
     {
-        for (j = 0; j < M; j++)
-        {
-            vecC[i] += (matA+i*L)[j] * vecB[j];
-        }
+        (*vecC) += (matA)[j] * vecB[j];
     }
 }
 
@@ -36,29 +42,21 @@ void matVecMult_part(int L, int N, int M, const double *matA, const double *vecB
 void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC) 
 {
     // Code in your optimized implementation here
-    int row = 0, column;
+    int row, column;
     memset(vecC, 0, sizeof(double) * N);
-    while (row + BLOCK_ELEMENTS < N)
+    for (row = 0; row < N; row++)
     {
         column = 0;
         while (column + BLOCK_ELEMENTS < N)
         {
-            matVecMult_part88(N, matA + row * N + column, vecB + column, vecC + row);
+            matVecMult_part88(matA + row * N + column, vecB + column, vecC + row);
             column += BLOCK_ELEMENTS;
         }
-        matVecMult_part(N, BLOCK_ELEMENTS, N - column, matA + row * N + column, vecB + column, vecC + row);
-        row += BLOCK_ELEMENTS;
+        matVecMult_part(N - column, matA + row * N + column, vecB + column, vecC + row);
     }
-    column = 0;
-    while (column + BLOCK_ELEMENTS < N)
-    {
-        matVecMult_part(N, N - row, BLOCK_ELEMENTS, matA + row * N + column, vecB + column, vecC + row);
-        column += BLOCK_ELEMENTS;
-    }
-    matVecMult_part(N, N - row, N - column, matA + row * N + column, vecB + column, vecC + row);
-
 }
 
+__attribute__((optimize("unroll-loops")))
 void matMult_part8(int L, const double *matA, const double *matB, double *matC)
 {
     int i,j,k;
