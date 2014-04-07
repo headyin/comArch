@@ -19,6 +19,6 @@ OBJECTS="$BUILD/main.o $BUILD/ecse425proj.o $BUILD/ecse425projOPT.o"
 # the directory "build/")
 
 gcc $FLAGS -c main.c -o $BUILD/main.o
-gcc $FLAGS -c ecse425proj.c -o $BUILD/ecse425proj.o
+gcc $FLAGS $OPTFLAGS -c ecse425proj.c -o $BUILD/ecse425proj.o
 gcc $FLAGS $OPTFLAGS -c ecse425projOPT.c -o $BUILD/ecse425projOPT.o
 gcc $FLAGS $OBJECTS -o $BUILD/ecse425proj

@@ -22,18 +22,6 @@ void matVecMult_part(int L, int N, int M, const double *matA, const double *vecB
 void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC) 
 {
     // Code in your optimized implementation here
-/*
-    int i, j;
-    for (i =0; i < N; i++)
-    {
-        vecC[i] = 0;
-        for (j = 0; j < N; j++)
-        {
-            vecC[i] += (matA+i*N)[j] * vecB[j];
-        }
-    }
-*/
-
     int row = 0, column;
     memset(vecC, 0, sizeof(double) * N);
     while (row + BLOCK_ELEMENTS < N)
@@ -57,37 +45,43 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
 
 }
 
-void matMult_opt(int N, const double *matA, const double *matB, double *matC) 
+void matMult_part(int L, int N, int M, int P, const double *matA, const double *matB, double *matC) 
 {
-    // Code in your optimized implementation here
-
-    double* vecB = (double*)malloc(sizeof(double)*N);
-    double* result = (double*)malloc(sizeof(double)*N);
-    int i,j;
-    for (i = 0; i < N; i++)
-    {
-        for (j = 0; j < N; j++)
-        {
-            vecB[j] = (matB+j*N)[i];
-        }
-        matVecMult_opt(N, matA, vecB, result);
-        for (j = 0; j < N; j++)
-        {
-            (matC+j*N)[i] = result[j];
-        }
-    }
-
-/*
     int i,j,k;
     for (i = 0; i < N; i++)
     {
-        for (j = 0; j < N; j++)
+        for (j = 0; j < M; j++)
         {
-            for (k = 0; k < N; k++)
+            for (k = 0; k < P; k++)
             {
-                (matC + i*N)[k] += (matA + i*N)[j] *(matB + j*N)[k];
+                (matC + i*L)[k] += (matA + i*L)[j] *(matB + j*L)[k];
             }
         }
     }
-*/
+}
+
+
+void matMult_opt(int N, const double *matA, const double *matB, double *matC) 
+{
+    // Code in your optimized implementation here
+    int rowA = 0, columnA, columnB, dRowA, dColumnA, dColumnB; //columnA is equal to rowB
+    memset(matC, 0, sizeof(double) * N * N);
+    while (rowA < N)
+    {
+        dRowA = (BLOCK_ELEMENTS < N - rowA) ? BLOCK_ELEMENTS : N - rowA;
+        columnA = 0;
+        while (columnA < N)
+        {
+            dColumnA = (BLOCK_ELEMENTS < N - columnA) ? BLOCK_ELEMENTS : N - columnA;
+            columnB = 0;
+            while (columnB < N)
+            {
+                dColumnB = (BLOCK_ELEMENTS < N - columnB) ? BLOCK_ELEMENTS : N - columnB;
+                matMult_part(N, dRowA, dColumnA, dColumnB, matA + rowA * N + columnA, matB + columnA * N + columnB, matC + rowA * N + columnB);
+                columnB += BLOCK_ELEMENTS;
+            }            
+            columnA += BLOCK_ELEMENTS;
+        }
+        rowA += BLOCK_ELEMENTS;
+    }
 }
