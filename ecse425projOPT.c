@@ -45,8 +45,28 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
 
 }
 
+void matMult_part8(int L, const double *matA, const double *matB, double *matC)
+{ 
+    int i,j,k;
+    for (i = 0; i < BLOCK_ELEMENTS; i++)
+    {
+        for (j = 0; j < BLOCK_ELEMENTS; j++)
+        {
+            for (k = 0; k < BLOCK_ELEMENTS; k++)
+            {
+                (matC + i*L)[k] += (matA + i*L)[j] *(matB + j*L)[k];
+            }
+        }
+    }
+}
+
 void matMult_part(int L, int N, int M, int P, const double *matA, const double *matB, double *matC) 
 {
+    if ((N == M) && (N == P) && (N == BLOCK_ELEMENTS))
+    {
+        matMult_part8(L, matA, matB, matC);
+        return;
+    }
     int i,j,k;
     for (i = 0; i < N; i++)
     {
