@@ -169,11 +169,13 @@ void matMult_opt(int N, const double *matA, const double *matB, double *matC)
  * column major
  */
     int rowA = 0, columnA, columnB, dRowA, dColumnA, dColumnB; //columnA is equal to rowB
+    int Nr = 0, Nc;
     memset(matC, 0, sizeof(double) * N * N);
     while (rowA < N)
     {
         dRowA = (BLOCK_ELEMENTS < N - rowA) ? BLOCK_ELEMENTS : N - rowA;
         columnA = 0;
+        Nc = 0;
         while (columnA < N)
         {
             dColumnA = (BLOCK_ELEMENTS < N - columnA) ? BLOCK_ELEMENTS : N - columnA;
@@ -181,11 +183,13 @@ void matMult_opt(int N, const double *matA, const double *matB, double *matC)
             while (columnB < N)
             {
                 dColumnB = (BLOCK_ELEMENTS < N - columnB) ? BLOCK_ELEMENTS : N - columnB;
-                matMult_part(N, dRowA, dColumnA, dColumnB, matB + rowA * N + columnA, matA + columnA * N + columnB, matC + rowA * N + columnB);
+                matMult_part(N, dRowA, dColumnA, dColumnB, matB + Nr + columnA, matA + Nc + columnB, matC + Nr + columnB);
                 columnB += BLOCK_ELEMENTS;
             }
             columnA += BLOCK_ELEMENTS;
+            Nc += dColumnA * N;
         }
         rowA += BLOCK_ELEMENTS;
+        Nr += dRowA * N;
     }
 }
