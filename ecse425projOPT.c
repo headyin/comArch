@@ -104,16 +104,23 @@ void matVecMult_opt(int N, const double *matA, const double *vecB, double *vecC)
 __attribute__((optimize("unroll-loops")))
 void matMult_part8(int L, const double *matA, const double *matB, double *matC)
 {
-    int i,j,k;
+    int i,j,k,li,lj;
+    double temp;
+    li = 0;
     for (i = 0; i < BLOCK_ELEMENTS; i++)
     {
-        for (j = 0; j < BLOCK_ELEMENTS; j++)
+        for (k = 0; k < BLOCK_ELEMENTS; k++)
         {
-            for (k = 0; k < BLOCK_ELEMENTS; k++)
+            temp = 0;
+            lj = 0;
+            for (j = 0; j < BLOCK_ELEMENTS; j++)
             {
-                (matC + i*L)[k] += (matA + i*L)[j] *(matB + j*L)[k];
+                temp += (matA + li)[j] *(matB + lj)[k];
+                lj += L;
             }
+            (matC + li)[k] += temp;
         }
+        li += L;
     }
 }
 
