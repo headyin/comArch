@@ -5,7 +5,7 @@
 #include <math.h>
 
 /* Specify the data layout format */
-const DLayout dlayout = RowMaj;
+const DLayout dlayout = ColMaj;
 
 void randInitialize(int sz, double *vPtr)
 {
@@ -16,7 +16,7 @@ void randInitialize(int sz, double *vPtr)
 
 void displayVec(int sz, const double *vPtr)
 {
-    if(dlayout == RowMaj)
+    if(dlayout == RowMaj || dlayout == ColMaj )
     {
         int i;
         printf("[");
@@ -41,9 +41,43 @@ void displayMat(int rows, int cols, const double *vPtr)
             displayVec(cols, &vPtr[i*rows]);
             printf("\n");
         }
-        printf("]");
+        printf("]\n");
+    }
+    else
+    {
+        int i,j;
+        printf("[\n");
+        for (i = 0; i < rows; i++)
+        {
+            printf("[");
+            for (j = 0; j < cols; j++)
+            {
+                printf("%e", (vPtr + cols * j)[i]);
+                if (j < cols - 1)
+                    printf(",");
+                else
+                    printf("]");
+            }
+            printf("\n");
+        }
+        printf("]\n");
     }
 }
+
+void matVecMult_rowMaj(int N, const double *matA, const double *vecB, double *vecC)
+{
+    int i, j;
+    for (i =0; i < N; i++)
+    {
+        vecC[i] = 0;
+        for (j = 0; j < N; j++)
+        {
+            vecC[i] += (matA+i*N)[j] * vecB[j];
+        }
+    }
+}
+
+
 
 void matMult(int N, const double *matA, const double *matB, double *matC)
 {
@@ -51,26 +85,52 @@ void matMult(int N, const double *matA, const double *matB, double *matC)
     {
         // Code in your naive implementation here
         double* vecB = (double*)malloc(sizeof(double)*N);
-	double* result = (double*)malloc(sizeof(double)*N);
-	int i = 0;
-	int j = 0;
-	int k = 0;
-	while (i < N){
-		j = 0;
-		while (j < N){	
-			vecB[j] = (matB+j*N)[i];
-			j++;
-		}
-		matVecMult(N, matA, vecB, result);
-		k = 0;
-		while (k < N){
-			(matC+k*N)[i] = result[k];
-			k++;
-		}
-		i++;
-	}
+        double* result = (double*)malloc(sizeof(double)*N);
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        while (i < N){
+            j = 0;
+            while (j < N){	
+                vecB[j] = (matB+j*N)[i];
+                j++;
+            }
+            matVecMult(N, matA, vecB, result);
+            k = 0;
+            while (k < N)
+            {
+                (matC+k*N)[i] = result[k];
+                k++;
+            }
+            i++;
+        }
+    }
+    else
+    {
+        double* vecB = (double*)malloc(sizeof(double)*N);
+        double* result = (double*)malloc(sizeof(double)*N);
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        while (i < N){
+            j = 0;
+            while (j < N){
+                vecB[j] = (matA+j*N)[i];
+                j++;
+            }
+            matVecMult_rowMaj(N, matB, vecB, result);
+            k = 0;
+            while (k < N)
+            {
+                (matC+k*N)[i] = result[k];
+                k++;
+            }
+            i++;
+        }
+
     }
 }
+
 
 void matVecMult(int N, const double *matA, const double *vecB, double *vecC)
 {
@@ -87,6 +147,19 @@ void matVecMult(int N, const double *matA, const double *vecB, double *vecC)
                 vecC[i] += (matA+i*N)[j] * vecB[j];
             }
         }
+    }
+    else
+    {
+        int i,j;
+        for (i =0; i < N; i++)
+        {
+            vecC[i] = 0;
+            for (j = 0; j < N; j++)
+            {
+                vecC[i] += (matA+j*N)[i] * vecB[j];
+            }
+        }
+
     }
 }
 
