@@ -141,6 +141,9 @@ void matMult_part(int L, int N, int M, int P, const double *matA, const double *
 void matMult_opt(int N, const double *matA, const double *matB, double *matC) 
 {
     // Code in your optimized implementation here
+/**
+ * row major
+
     int rowA = 0, columnA, columnB, dRowA, dColumnA, dColumnB; //columnA is equal to rowB
     memset(matC, 0, sizeof(double) * N * N);
     while (rowA < N)
@@ -157,6 +160,30 @@ void matMult_opt(int N, const double *matA, const double *matB, double *matC)
                 matMult_part(N, dRowA, dColumnA, dColumnB, matA + rowA * N + columnA, matB + columnA * N + columnB, matC + rowA * N + columnB);
                 columnB += BLOCK_ELEMENTS;
             }            
+            columnA += BLOCK_ELEMENTS;
+        }
+        rowA += BLOCK_ELEMENTS;
+    }
+*/
+/**
+ * column major
+ */
+    int rowA = 0, columnA, columnB, dRowA, dColumnA, dColumnB; //columnA is equal to rowB
+    memset(matC, 0, sizeof(double) * N * N);
+    while (rowA < N)
+    {
+        dRowA = (BLOCK_ELEMENTS < N - rowA) ? BLOCK_ELEMENTS : N - rowA;
+        columnA = 0;
+        while (columnA < N)
+        {
+            dColumnA = (BLOCK_ELEMENTS < N - columnA) ? BLOCK_ELEMENTS : N - columnA;
+            columnB = 0;
+            while (columnB < N)
+            {
+                dColumnB = (BLOCK_ELEMENTS < N - columnB) ? BLOCK_ELEMENTS : N - columnB;
+                matMult_part(N, dRowA, dColumnA, dColumnB, matB + rowA * N + columnA, matA + columnA * N + columnB, matC + rowA * N + columnB);
+                columnB += BLOCK_ELEMENTS;
+            }
             columnA += BLOCK_ELEMENTS;
         }
         rowA += BLOCK_ELEMENTS;
